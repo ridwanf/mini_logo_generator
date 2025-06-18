@@ -1,0 +1,124 @@
+
+
+.header {
+  padding: 20rpx 0;
+  text-align: center;
+  margin-bottom: 30rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.upload-container {
+  width: 100%;
+  padding: 20rpx 0;
+}
+
+
+.image-preview-container {
+  position: relative;
+  margin: 20rpx 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.canvas-container {
+  position: relative;
+  background-color: #ddd;
+}
+
+.image-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-text {
+  color: white;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin: 20rpx 0;
+  padding-left: 10rpx;
+}
+
+.filter-name {
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.filter-intensity {
+  padding: 20rpx;
+  background-color: white;
+  border-radius: 8rpx;
+  margin: 20rpx 0;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 30rpx;
+}
+
+.action-button {
+  width: 45%;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+  margin-top: 60rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999;
+}

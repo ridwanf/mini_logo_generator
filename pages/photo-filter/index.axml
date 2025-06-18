@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="header">
+    <view class="title">{{pageTitle}}</view>
+    <view class="subtitle">{{pageDescription}}</view>
+    <view class="nav-buttons">
+      <navigator url="/pages/index/index" open-type="navigate" class="nav-button">
+        <view class="nav-button-text">Logo Generator</view>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="content">
+    <!-- Using the photo-filter component -->
+    <photo-filter />
+  </view>
+</view>

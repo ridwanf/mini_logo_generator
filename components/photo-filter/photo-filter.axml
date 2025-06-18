@@ -1,0 +1,58 @@
+<view class="photo-filter-container">
+  <!-- Image upload button -->
+  <view class="upload-container">
+    <button type="primary" class="upload-button" onTap="chooseImage">
+      {{showImage ? 'Change Image' : 'Upload Photo'}}
+    </button>
+  </view>
+
+  <!-- Image preview area -->
+  <view class="image-preview-container" a:if="{{showImage}}">
+    <view class="canvas-container" style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;">
+      <canvas id="imageCanvas" class="image-canvas" style="width: {{canvasWidth}}px; height: {{canvasHeight}}px; filter: {{currentFilterCSS}};"></canvas>
+    </view>
+    
+    <view class="loading-overlay" a:if="{{isProcessing}}">
+      <view class="loading-text">Processing...</view>
+    </view>
+  </view>
+
+  <!-- Filter options -->
+  <view class="filter-options-container" a:if="{{showImage}}">
+    <view class="section-title">Select Filter</view>
+    <view class="filter-options">
+      <view 
+        a:for="{{filters}}" 
+        class="filter-option {{currentFilter === item.id ? 'selected' : ''}}" 
+        data-filter="{{item.id}}" 
+        onTap="applyFilter">
+        <view class="filter-name">{{item.name}}</view>
+      </view>
+    </view>
+
+    <!-- Filter intensity slider -->
+    <view class="filter-intensity" a:if="{{currentFilter !== 'none'}}">
+      <view class="section-title">Filter Intensity</view>
+      <slider 
+        value="{{filterIntensity}}" 
+        min="0" 
+        max="100" 
+        show-value 
+        onChange="onIntensityChange" 
+        activeColor="#1677ff"
+      />
+    </view>
+
+    <!-- Action buttons -->
+    <view class="action-buttons">
+      <button type="default" class="action-button" onTap="resetImage">Reset</button>
+      <button type="primary" class="action-button" onTap="saveImage">Save Image</button>
+    </view>
+  </view>
+
+  <!-- Empty state -->
+  <view class="empty-state" a:if="{{!showImage}}">
+    <view class="empty-icon">📷</view>
+    <view class="empty-text">Upload a photo to get started</view>
+  </view>
+</view>

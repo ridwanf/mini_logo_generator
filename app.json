@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/photo-filter/index"
+  ],
+  "window": {
+    "defaultTitle": "Merchant Logo Generator"
+  },
+  "usingComponents": {
+    "photo-filter": "/components/photo-filter/photo-filter",
+    "logo-generator": "/components/logo-generator/logo-generator",
+    "logo-preview": "/components/logo-preview/logo-preview",
+    "modal": "mini-antui/es/modal/index"
+  }
+}

@@ -1,0 +1,29 @@
+<!-- Preview Modal -->
+<modal
+  show="{{show}}"
+  onModalClose="onModalClose"
+  onButtonClick="onModalButtonClick"
+  buttons="{{['Download', 'Close']}}"
+>
+  <view slot="header">Logo Preview</view>
+  <view class="preview-modal-content">
+    <view class="logo-preview-large" style="background-color: {{logoBackground}}; filter: {{logoFilter}}">
+      <view class="logo-text" style="color: {{logoTextColor}}">
+        <text class="logo-initial-large">{{businessNameInitial}}</text>
+        <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name-large">{{businessName}}</text>
+        <text a:if="{{slogan}}" class="logo-slogan-large">{{slogan}}</text>
+      </view>
+    </view>
+    
+    <button type="primary" class="download-button" onTap="onDownloadTap">
+      <view class="download-button-content">
+        <view class="download-icon">↓</view>
+        <text>Download Logo</text>
+      </view>
+    </button>
+    <view class="preview-description" a:if="{{description}}">
+      <text class="description-label">Business Description:</text>
+      <text class="description-text">{{description}}</text>
+    </view>
+  </view>
+</modal>

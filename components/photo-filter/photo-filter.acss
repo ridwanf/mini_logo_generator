@@ -1,0 +1,134 @@
+.photo-filter-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.upload-container {
+  width: 100%;
+  padding: 20rpx 0;
+}
+
+.upload-button {
+  width: 100%;
+}
+
+.image-preview-container {
+  position: relative;
+  margin: 20rpx 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.canvas-container {
+  position: relative;
+  background-color: #ddd;
+}
+
+.image-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-text {
+  color: white;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.filter-options-container {
+  width: 100%;
+  margin-top: 30rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin: 20rpx 0;
+  padding-left: 10rpx;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10rpx 0;
+  margin-bottom: 20rpx;
+}
+
+.filter-option {
+  flex: 0 0 auto;
+  margin: 0 10rpx;
+  padding: 16rpx 24rpx;
+  background-color: white;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.filter-option.selected {
+  background-color: #1677ff;
+  color: white;
+}
+
+.filter-name {
+  font-size: 28rpx;
+  text-align: center;
+}
+
+.filter-intensity {
+  padding: 20rpx;
+  background-color: white;
+  border-radius: 8rpx;
+  margin: 20rpx 0;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 30rpx;
+}
+
+.action-button {
+  width: 45%;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+  margin-top: 60rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999;
+}
