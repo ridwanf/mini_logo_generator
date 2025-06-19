@@ -2,7 +2,7 @@
   <view class="form-container">
     <view class="form-item">
       <view class="form-label">Nama Bisnis Kamu</view>
-      <input class="form-input" placeholder="Enter your business name" onInput="onBusinessNameInput" value="{{businessName}}" />
+      <input class="form-input" placeholder="Enter your business name"  onInput="onBusinessNameInput" value="{{businessName}}" />
     </view>
 
     <view class="form-item">
@@ -68,71 +68,24 @@
       </view>
     </view>
 
-    <button type="primary" class="generate-button" onTap="generateLogo" disabled="{{!businessName}}">Buat Logo</button>
+    <button type="primary" class="generate-button" onTap="generateLogo" disabled="{{!businessName || isLoading}}">
+      <block a:if="{{isLoading}}">
+        <view class="loading-container">
+          <view class="loading-spinner"></view>
+          <text>Generating...</text>
+        </view>
+      </block>
+      <block a:else>Buat Logo</block>
+    </button>
   </view>
 
-  <view class="preview-container" a:if="{{showPreview}}">
-    <view class="preview-header">Preview Options</view>
-    <view class="preview-scroll-container">
-      <view class="logo-preview" style="background-color: {{logoBackground}}">
-        <view class="logo-text" style="color: {{logoTextColor}}">
-          <text class="logo-initial">{{businessNameInitial}}</text>
-          <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name">{{businessName}}</text>
-          <text a:if="{{slogan}}" class="logo-slogan">{{slogan}}</text>
-        </view>
-        <view class="logo-actions">
-          <view class="action-button full-width" onTap="previewLogo" data-index="0">Preview</view>
-        </view>
-      </view>
-      <view class="logo-preview" style="background-color: {{logoBackground}}; filter: brightness(0.9)">
-        <view class="logo-text" style="color: {{logoTextColor}}">
-          <text class="logo-initial">{{businessNameInitial}}</text>
-          <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name">{{businessName}}</text>
-          <text a:if="{{slogan}}" class="logo-slogan">{{slogan}}</text>
-        </view>
-        <view class="logo-actions">
-          <view class="action-button full-width" onTap="previewLogo" data-index="1">Preview</view>
-        </view>
-      </view>
-      <view class="logo-preview" style="background-color: {{logoBackground}}; filter: brightness(1.1)">
-        <view class="logo-text" style="color: {{logoTextColor}}">
-          <text class="logo-initial">{{businessNameInitial}}</text>
-          <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name">{{businessName}}</text>
-          <text a:if="{{slogan}}" class="logo-slogan">{{slogan}}</text>
-        </view>
-        <view class="logo-actions">
-          <view class="action-button full-width" onTap="previewLogo" data-index="2">Preview</view>
-        </view>
-      </view>
-      <view class="logo-preview" style="background-color: {{logoBackground}}; filter: saturate(1.5)">
-        <view class="logo-text" style="color: {{logoTextColor}}">
-          <text class="logo-initial">{{businessNameInitial}}</text>
-          <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name">{{businessName}}</text>
-          <text a:if="{{slogan}}" class="logo-slogan">{{slogan}}</text>
-        </view>
-        <view class="logo-actions">
-          <view class="action-button full-width" onTap="previewLogo" data-index="3">Preview</view>
-        </view>
-      </view>
-      <view class="logo-preview" style="background-color: {{logoBackground}}; filter: saturate(0.7)">
-        <view class="logo-text" style="color: {{logoTextColor}}">
-          <text class="logo-initial">{{businessNameInitial}}</text>
-          <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name">{{businessName}}</text>
-          <text a:if="{{slogan}}" class="logo-slogan">{{slogan}}</text>
-        </view>
-        <view class="logo-actions">
-          <view class="action-button full-width" onTap="previewLogo" data-index="4">Preview</view>
-        </view>
-      </view>
-      <view class="logo-preview" style="background-color: {{logoBackground}}; filter: hue-rotate(15deg)">
-        <view class="logo-text" style="color: {{logoTextColor}}">
-          <text class="logo-initial">{{businessNameInitial}}</text>
-          <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name">{{businessName}}</text>
-          <text a:if="{{slogan}}" class="logo-slogan">{{slogan}}</text>
-        </view>
-        <view class="logo-actions">
-          <view class="action-button full-width" onTap="previewLogo" data-index="5">Preview</view>
-        </view>
+  <!-- AI Generated Logo Section -->
+  <view class="preview-container" a:if="{{showAiGeneratedLogo}}">
+    <view class="preview-header">AI Generated Logo</view>
+    <view class="ai-logo-container">
+      <image class="ai-generated-logo" src="{{aiGeneratedLogoUrl}}" mode="aspectFit" onTap="previewAiLogo" />
+      <view class="logo-actions">
+        <view class="action-button full-width" onTap="previewAiLogo">Preview</view>
       </view>
     </view>
   </view>
@@ -148,6 +101,8 @@
     logoTextColor="{{previewLogoTextColor}}"
     logoStyle="{{logoStyle}}"
     logoFilter="{{previewLogoFilter}}"
+    aiGeneratedLogoUrl="{{aiGeneratedLogoUrl}}"
+    currentApiLogoIndex="{{currentApiLogoIndex}}"
     onClose="onPreviewClose"
     onDownload="onPreviewDownload"
   />

@@ -7,18 +7,31 @@
 >
   <view slot="header">Logo Preview</view>
   <view class="preview-modal-content">
-    <view class="logo-preview-large" style="background-color: {{logoBackground}}; filter: {{logoFilter}}">
+    <!-- Debug info -->
+    <view class="debug-info" style="font-size: 10px; color: #999; margin-bottom: 10px;">
+      <text>isAiGenerated: {{isAiGenerated}}</text>
+      <text>aiGeneratedLogoUrl: {{aiGeneratedLogoUrl ? 'Set' : 'Not Set'}}</text>
+    </view>
+    
+    <!-- AI-generated logo display -->
+    <view a:if="{{isAiGenerated}}" class="logo-preview-large ai-logo-container">
+      <image class="ai-generated-logo-large" src="{{aiGeneratedLogoUrl}}" mode="aspectFit" style="filter: {{imageFilter}}" />
+      <view class="watermark">DanaVentures</view>
+    </view>
+    
+    <!-- Standard text-based logo display -->
+    <view a:else class="logo-preview-large" style="background-color: {{logoBackground}}; filter: {{logoFilter}}">
       <view class="logo-text" style="color: {{logoTextColor}}">
         <text class="logo-initial-large">{{businessNameInitial}}</text>
         <text a:if="{{logoStyle !== 'minimalist'}}" class="logo-name-large">{{businessName}}</text>
         <text a:if="{{slogan}}" class="logo-slogan-large">{{slogan}}</text>
       </view>
+      <view class="watermark">DanaVentures</view>
     </view>
     
     <button type="primary" class="download-button" onTap="onDownloadTap">
       <view class="download-button-content">
-        <view class="download-icon">↓</view>
-        <text>Download Logo</text>
+        <text>Download</text>
       </view>
     </button>
     <view class="preview-description" a:if="{{description}}">
