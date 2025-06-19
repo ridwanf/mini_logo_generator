@@ -29,17 +29,17 @@ Component({
     onBusinessNameInput(e) {
       const name = e.detail.value;
       let initial = '';
-      
+
       if (name && name.length > 0) {
         initial = name.charAt(0).toUpperCase();
       }
-      
+
       this.setData({
         businessName: name,
         businessNameInitial: initial,
       });
     },
-    
+
     onSloganInput(e) {
       const slogan = e.detail.value;
       this.setData({
@@ -62,16 +62,16 @@ Component({
 
     onColorSelect(e) {
       const hexColor = e.target.dataset.color;
-      
+
       this.setData({
         selectedColor: hexColor,
         logoBackground: hexColor
       });
     },
-    
+
     onColorInput(e) {
       let hexColor = e.detail.value;
-      
+
       // Validate hex color format
       if (/^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
         this.setData({
@@ -102,12 +102,12 @@ Component({
         });
         return;
       }
-      
+
       // Show loading indicator
       this.setData({
         isLoading: true
       });
-      
+
       // Show loading dialog
       my.showLoading({
         content: 'Generating logo...',
@@ -139,15 +139,15 @@ Component({
           }
         })
         console.log('Full API response:', JSON.stringify(response, null, 2));
-        
+
         // Process the API response
         const processedLogos = [];
-        
+
         if (response.data) {
           // Check if the response has data.outputs
           if (response.data.outputs) {
             console.log('API Response outputs:', JSON.stringify(response.data.outputs, null, 2));
-            
+
             // Check for image in various possible locations
             if (response.data.outputs.image) {
               console.log('Found image in outputs.image');
@@ -180,19 +180,19 @@ Component({
               // Check if the text contains a markdown image link
               const text = response.data.outputs.text;
               console.log('Found text in outputs.text:', text);
-              
+
               // Extract image URL from markdown format: ![](url)
               const markdownImageRegex = /!\[.*?\]\((.*?)\)/g;
               const matches = [...text.matchAll(markdownImageRegex)];
-              
+
               if (matches && matches.length > 0) {
                 console.log('Found image URLs in markdown text:', matches.length);
-                
+
                 matches.forEach((match, index) => {
                   if (match[1]) {
                     const imageUrl = match[1].split('?')[0]; // Remove query parameters if any
                     console.log(`Extracted image URL ${index + 1}:`, imageUrl);
-                    
+
                     processedLogos.push({
                       url: match[1], // Use the full URL with parameters
                       filter: ''
@@ -214,7 +214,7 @@ Component({
             // Handle nested data structure
             const outputs = response.data.data.outputs;
             console.log('Nested outputs:', JSON.stringify(outputs, null, 2));
-            
+
             if (outputs.image) {
               processedLogos.push({
                 url: outputs.image,
@@ -242,7 +242,7 @@ Component({
               const text = outputs.text;
               const markdownImageRegex = /!\[.*?\]\((.*?)\)/g;
               const matches = [...text.matchAll(markdownImageRegex)];
-              
+
               if (matches && matches.length > 0) {
                 matches.forEach((match, index) => {
                   if (match[1]) {
@@ -255,7 +255,7 @@ Component({
               }
             }
           }
-          
+
           // If we found logos, update the state
           if (processedLogos.length > 0) {
             this.setData({
@@ -270,7 +270,7 @@ Component({
             });
           }
         }
-        
+
         // Hide loading indicator
         my.hideLoading();
       } catch (error) {
@@ -280,14 +280,14 @@ Component({
           content: 'Failed to generate logo',
           duration: 2000
         });
-        
+
         // Hide loading indicator and reset loading state
         my.hideLoading();
         this.setData({
           isLoading: false
         });
       }
-   
+
       this.setData({
         showPreview: true,
         logoTextColor
@@ -306,10 +306,10 @@ Component({
       const r = parseInt(hexColor.substr(1, 2), 16);
       const g = parseInt(hexColor.substr(3, 2), 16);
       const b = parseInt(hexColor.substr(5, 2), 16);
-      
+
       // Calculate luminance
       const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-      
+
       // Return black or white based on luminance
       return luminance > 0.5 ? '#000000' : '#ffffff';
     },
@@ -317,22 +317,22 @@ Component({
     downloadLogo(e) {
       // Get the logo index from the data attribute
       const index = e.target.dataset.index;
-      
+
       // In a real app, this would generate and download the specific logo
       my.showToast({
         content: `Downloading logo variation #${parseInt(index) + 1}`,
         duration: 2000
       });
     },
-    
+
     previewLogo(e) {
       const index = e.target.dataset.index;
       let logoIndex = parseInt(index);
       let filter = '';
       let background = this.data.logoBackground;
-      
+
       // Apply different filters based on the index
-      switch(logoIndex) {
+      switch (logoIndex) {
         case 0:
           filter = '';
           break;
@@ -346,10 +346,10 @@ Component({
           filter = 'grayscale(100%)';
           break;
       }
-      
+
       // Calculate background color with filter applied for preview
       const previewBackground = filter ? `${background}` : background;
-      
+
       // Show the preview modal
       this.setData({
         showPreviewModal: true,
@@ -359,13 +359,13 @@ Component({
         previewLogoFilter: filter
       });
     },
-    
+
     previewApiLogo(e) {
       const index = e.target.dataset.index;
-      
+
       if (this.data.generatedLogos && this.data.generatedLogos[index]) {
         const logo = this.data.generatedLogos[index];
-        
+
         this.setData({
           showPreviewModal: true,
           aiGeneratedLogoUrl: logo.url,
@@ -373,13 +373,13 @@ Component({
         });
       }
     },
-    
+
     onPreviewClose() {
       this.setData({
         showPreviewModal: false
       });
     },
-    
+
     onPreviewDownload() {
       // Handle download based on whether it's an AI-generated logo or text-based logo
       if (this.data.currentApiLogoIndex >= 0 && this.data.generatedLogos && this.data.generatedLogos[this.data.currentApiLogoIndex]) {
@@ -417,13 +417,13 @@ Component({
         });
       }
     },
-    
+
     previewAiLogo() {
       // Show the AI-generated logo in the preview modal
       if (this.data.aiGeneratedLogoUrl) {
         const logoUrl = this.data.aiGeneratedLogoUrl;
         console.log('Previewing AI logo:', logoUrl);
-        
+
         // First ensure the URL is set correctly
         this.setData({
           aiGeneratedLogoUrl: logoUrl
@@ -445,7 +445,7 @@ Component({
         });
       }
     },
-    
+
     downloadAiLogo() {
       // Download the AI-generated logo
       if (this.data.aiGeneratedLogoUrl) {

@@ -2,17 +2,11 @@
 <modal
   show="{{show}}"
   onModalClose="onModalClose"
-  onButtonClick="onModalButtonClick"
   buttons="{{['Download', 'Close']}}"
 >
   <view slot="header">Logo Preview</view>
   <view class="preview-modal-content">
-    <!-- Debug info -->
-    <view class="debug-info" style="font-size: 10px; color: #999; margin-bottom: 10px;">
-      <text>isAiGenerated: {{isAiGenerated}}</text>
-      <text>aiGeneratedLogoUrl: {{aiGeneratedLogoUrl ? 'Set' : 'Not Set'}}</text>
-    </view>
-    
+  
     <!-- AI-generated logo display -->
     <view a:if="{{isAiGenerated}}" class="logo-preview-large ai-logo-container">
       <image class="ai-generated-logo-large" src="{{aiGeneratedLogoUrl}}" mode="aspectFit" style="filter: {{imageFilter}}" />
