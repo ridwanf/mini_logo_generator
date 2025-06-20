@@ -1,0 +1,3 @@
+<view class="splash">
+  <image class="splash__image" mode="aspectFit" src="../../assets/imgs/potrait.png" />
+</view>

@@ -1,33 +1,39 @@
 <view class="logo-generator-container">
+  <!-- Loading mask overlay -->
+  <view a:if="{{showLoadingMask}}" class="loading-mask">
+  </view>
   <view class="form-container">
     <view class="form-item">
       <view class="form-label">Nama Bisnis Kamu</view>
-      <input class="form-input" placeholder="Enter your business name"  onInput="onBusinessNameInput" value="{{businessName}}" />
+      <input class="form-input {{errors.businessName ? 'input-error' : ''}}" placeholder="Enter your business name" onInput="onBusinessNameInput" onBlur="onBusinessNameBlur" value="{{businessName}}" />
+      <view a:if="{{errors.businessName}}" class="error-message">{{errors.businessName}}</view>
     </view>
 
     <view class="form-item">
       <view class="form-label">Slogan Bisnis Kamu</view>
-      <input class="form-input" placeholder="Enter your business slogan" onInput="onSloganInput" value="{{slogan}}" />
+      <input class="form-input" placeholder="Enter your business slogan" onInput="onSloganInput" onBlur="onSloganBlur" value="{{slogan}}" />
     </view>
 
     <view class="form-item">
       <view class="form-label">Ceritakan Tentang Bisnis Kamu</view>
-      <textarea class="form-textarea" placeholder="Enter your business description" onInput="onDescriptionInput" value="{{description}}" maxlength="200"></textarea>
+      <textarea class="form-textarea {{errors.description ? 'input-error' : ''}}" placeholder="Enter your business description" onInput="onDescriptionInput" onBlur="onDescriptionBlur" value="{{description}}" maxlength="100"></textarea>
+      <view a:if="{{errors.description}}" class="error-message">{{errors.description}}</view>
     </view>
 
     <view class="form-item">
       <view class="form-label">Kategori Bisnis Kamu</view>
       <picker onChange="onBusinessTypeChange" value="{{businessTypeIndex}}" range="{{businessTypes}}">
-        <view class="picker-content">
+        <view class="picker-content {{errors.businessType ? 'input-error' : ''}}">
           <view class="picker-value">{{businessTypes[businessTypeIndex]}}</view>
           <view class="picker-arrow">▼</view>
         </view>
       </picker>
+      <view a:if="{{errors.businessType}}" class="error-message">{{errors.businessType}}</view>
     </view>
 
     <view class="form-item">
       <view class="form-label">Tema Warna Logo</view>
-      <view class="color-picker-container">
+      <view class="color-picker-container {{errors.color ? 'input-error-border' : ''}}">
         <!-- Predefined Colors -->
         <view class="color-options">
           <view class="color-option {{selectedColor === '#1677ff' ? 'selected' : ''}}" style="background-color: #1677ff;" data-color="#1677ff" onTap="onColorSelect"></view>
@@ -44,15 +50,16 @@
         <view class="hex-input-container">
           <view class="color-preview" style="background-color: {{selectedColor}}"></view>
           <view class="input-wrapper">
-            <input class="form-input color-hex-input" value="{{selectedColor}}" placeholder="#RRGGBB" onInput="onColorInput" maxlength="7" />
+            <input class="form-input color-hex-input" value="{{selectedColor}}" placeholder="#RRGGBB" onInput="onColorInput" onBlur="onColorBlur" maxlength="7" />
           </view>
         </view>
       </view>
+      <view a:if="{{errors.color}}" class="error-message">{{errors.color}}</view>
     </view>
 
     <view class="form-item">
       <view class="form-label">Style Logo</view>
-      <view class="style-options">
+      <view class="style-options {{errors.logoStyle ? 'input-error-border' : ''}}">
         <view class="style-option {{logoStyle === 'modern' ? 'selected' : ''}}" data-style="modern" onTap="onStyleSelect">
           <view class="style-icon modern">M</view>
           <view class="style-name">Modern</view>
@@ -66,9 +73,16 @@
           <view class="style-name">Minimalist</view>
         </view>
       </view>
+      <view a:if="{{errors.logoStyle}}" class="error-message">{{errors.logoStyle}}</view>
     </view>
 
-    <button type="primary" class="generate-button" onTap="generateLogo" disabled="{{!businessName || isLoading}}">
+    <!-- Daily generation limit indicator -->
+    <view class="generation-limit-container">
+      <text a:if="{{ dailyGenerationsLeft >0 }}" class="generation-limit-text {{dailyGenerationsLeft === 1 ? 'warning' : ''}} {{dailyGenerationsLeft === 0 ? 'danger' : ''}}">Logo generations left today: {{dailyGenerationsLeft}}/{{dailyGenerationsTotal}}</text>
+      <view a:else class="error-message generation-limit-error">{{errors.generationLimit}}</view>
+    </view>
+
+    <button type="primary" class="generate-button" onTap="generateLogo" disabled="{{!formIsValid || isLoading}}">
       <block a:if="{{isLoading}}">
         <view class="loading-container">
           <view class="loading-spinner"></view>
@@ -80,14 +94,35 @@
   </view>
 
   <!-- AI Generated Logo Section -->
-  <view class="preview-container" a:if="{{showAiGeneratedLogo}}">
-    <view class="preview-header">AI Generated Logo</view>
-    <view class="ai-logo-container">
-      <image class="ai-generated-logo" src="{{aiGeneratedLogoUrl}}" mode="aspectFit" onTap="previewAiLogo" />
-      <view class="logo-actions">
-        <view class="action-button full-width" onTap="previewAiLogo">Preview</view>
+  <view class="preview-container" a:if="{{showAiGeneratedLogo && generatedLogos.length > 0}}">
+    <view class="preview-header">AI Generated Logos ({{generatedLogos.length}})</view>
+    
+    <!-- Horizontal scrollable container for logos -->
+    <scroll-view class="logos-scroll-view" scroll-x="true" enable-flex="true">
+      <view class="logos-scroll-content">
+        <block a:for="{{generatedLogos}}" a:for-index="idx" a:for-item="logoUrl">
+          <view class="logo-item">
+            <image 
+              class="ai-generated-logo" 
+              src="{{logoUrl}}" 
+              mode="aspectFit" 
+              data-index="{{idx}}" 
+              onTap="previewAiLogo" 
+            />
+            <view class="logo-actions">
+              <button 
+                type="primary" 
+                class="preview-button" 
+                data-index="{{idx}}" 
+                onTap="previewAiLogo"
+              >
+                PREVIEW
+              </button>
+            </view>
+          </view>
+        </block>
       </view>
-    </view>
+    </scroll-view>
   </view>
 
   <!-- Logo Preview Component -->

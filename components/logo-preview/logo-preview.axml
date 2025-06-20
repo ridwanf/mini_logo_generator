@@ -6,7 +6,7 @@
 >
   <view slot="header">Logo Preview</view>
   <view class="preview-modal-content">
-  
+    
     <!-- AI-generated logo display -->
     <view a:if="{{isAiGenerated}}" class="logo-preview-large ai-logo-container">
       <image class="ai-generated-logo-large" src="{{aiGeneratedLogoUrl}}" mode="aspectFit" style="filter: {{imageFilter}}" />
@@ -28,9 +28,5 @@
         <text>Download</text>
       </view>
     </button>
-    <view class="preview-description" a:if="{{description}}">
-      <text class="description-label">Business Description:</text>
-      <text class="description-text">{{description}}</text>
-    </view>
   </view>
 </modal>

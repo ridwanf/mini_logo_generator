@@ -2,6 +2,8 @@ import { HERMES_KEY, HERMES_URL, HERMES_USER } from "/constants";
 import { request } from "/utils/request";
 
 Component({
+  // Define the component template to include the loading mask
+  props: {},
   data: {
     businessName: '',
     businessNameInitial: '',
@@ -22,7 +24,35 @@ Component({
     aiGeneratedLogoUrl: '',
     previewLogoFilter: '',
     generatedLogos: [],
-    currentApiLogoIndex: -1
+    currentApiLogoIndex: -1,
+    showLoadingMask: false,
+    loadingMessage: '',
+    formIsValid: false,
+    dailyGenerationsLeft: 3,
+    dailyGenerationsTotal: 3,
+    lastGenerationDate: '',
+    // Fields that have been blurred/touched
+    touchedFields: {
+      businessName: false,
+      description: false,
+      businessType: false,
+      color: false,
+      logoStyle: false
+    },
+    // Error messages for form fields
+    errors: {
+      businessName: '',
+      description: '',
+      businessType: '',
+      color: '',
+      logoStyle: '',
+      generationLimit: ''
+    }
+  },
+
+  didMount() {
+    // Check and initialize daily generation limit when component mounts
+    this._initDailyGenerationLimit();
   },
 
   methods: {
@@ -37,6 +67,17 @@ Component({
       this.setData({
         businessName: name,
         businessNameInitial: initial,
+      }, () => {
+        // Only validate but don't show errors until blur
+        this._checkFormValidity(false);
+      });
+    },
+    
+    onBusinessNameBlur() {
+      this.setData({
+        'touchedFields.businessName': true
+      }, () => {
+        this._checkFormValidity(true);
       });
     },
 
@@ -44,74 +85,312 @@ Component({
       const slogan = e.detail.value;
       this.setData({
         slogan: slogan
+      }, () => {
+        this._checkFormValidity(false);
       });
+    },
+    
+    onSloganBlur() {
+      // Slogan is optional, so no need to mark as touched
+      this._checkFormValidity(false);
     },
 
     onDescriptionInput(e) {
       const description = e.detail.value;
       this.setData({
         description: description
+      }, () => {
+        this._checkFormValidity(false);
+      });
+    },
+    
+    onDescriptionBlur() {
+      this.setData({
+        'touchedFields.description': true
+      }, () => {
+        this._checkFormValidity(true);
       });
     },
 
     onBusinessTypeChange(e) {
       this.setData({
-        businessTypeIndex: e.detail.value
+        businessTypeIndex: e.detail.value,
+        'touchedFields.businessType': true
+      }, () => {
+        this._checkFormValidity(true);
       });
     },
 
     onColorSelect(e) {
-      const hexColor = e.target.dataset.color;
-
+      const color = e.target.dataset.color;
       this.setData({
-        selectedColor: hexColor,
-        logoBackground: hexColor
+        selectedColor: color,
+        logoBackground: color,
+        'touchedFields.color': true
+      }, () => {
+        this._checkFormValidity(true);
       });
     },
-
+    
     onColorInput(e) {
-      let hexColor = e.detail.value;
-
-      // Validate hex color format
-      if (/^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
-        this.setData({
-          selectedColor: hexColor,
-          logoBackground: hexColor
-        });
-      }
+      const color = e.detail.value;
+      this.setData({
+        selectedColor: color,
+        logoBackground: color
+      }, () => {
+        this._checkFormValidity(false);
+      });
+    },
+    
+    onColorBlur() {
+      this.setData({
+        'touchedFields.color': true
+      }, () => {
+        this._checkFormValidity(true);
+      });
     },
 
     onStyleSelect(e) {
       const style = e.target.dataset.style;
       this.setData({
-        logoStyle: style
+        logoStyle: style,
+        'touchedFields.logoStyle': true
+      }, () => {
+        this._checkFormValidity(true);
+      });
+    },
+
+    // Helper method to check if all required form fields are filled
+    // showErrors: if true, will show errors for touched fields
+    _checkFormValidity(showErrors = true) {
+      const { 
+        businessName, 
+        slogan, 
+        businessTypeIndex, 
+        selectedColor, 
+        logoBackground,
+        logoStyle,
+        description, 
+        dailyGenerationsLeft,
+        touchedFields
+      } = this.data;
+
+      // Initialize error messages object
+      const errors = {
+        businessName: '',
+        description: '',
+        businessType: '',
+        color: '',
+        logoStyle: '',
+        generationLimit: ''
+      };
+
+      // Business name validation - required and min length 2 characters
+      const isBusinessNameValid = !!businessName && businessName.trim().length >= 2;
+      if (!isBusinessNameValid && (showErrors && touchedFields.businessName)) {
+        if (!businessName || businessName.trim() === '') {
+          errors.businessName = 'Business name is required';
+        } else {
+          errors.businessName = 'Business name must be at least 2 characters';
+        }
+      }
+      
+      // Description validation - required and min length 10 characters
+      const isDescriptionValid = !!description && description.trim().length >= 10;
+      if (!isDescriptionValid && (showErrors && touchedFields.description)) {
+        if (!description || description.trim() === '') {
+          errors.description = 'Description is required';
+        } else {
+          errors.description = 'Description must be at least 10 characters';
+        }
+      }
+      
+      // Business type validation - must be selected
+      const isBusinessTypeValid = businessTypeIndex >= 0;
+      if (!isBusinessTypeValid && (showErrors && touchedFields.businessType)) {
+        errors.businessType = 'Please select a business type';
+      }
+      
+      // Color validation - must have valid color values
+      const isColorValid = !!selectedColor && selectedColor.startsWith('#') && 
+                          !!logoBackground && logoBackground.startsWith('#');
+      if (!isColorValid && (showErrors && touchedFields.color)) {
+        errors.color = 'Please select valid colors for your logo';
+      }
+      
+      // Logo style validation - must be one of the valid options
+      const isLogoStyleValid = ['modern', 'classic', 'minimalist'].includes(logoStyle);
+      if (!isLogoStyleValid && (showErrors && touchedFields.logoStyle)) {
+        errors.logoStyle = 'Please select a valid logo style';
+      }
+      
+      // Daily generation limit validation - always show this error
+      const hasGenerationsLeft = dailyGenerationsLeft > 0;
+      if (!hasGenerationsLeft) {
+        errors.generationLimit = 'Daily generation limit reached. Try again tomorrow.';
+      }
+      
+      // Combine all validations
+      const isValid = isBusinessNameValid && 
+                     isDescriptionValid && 
+                     isBusinessTypeValid && 
+                     isColorValid && 
+                     isLogoStyleValid && 
+                     hasGenerationsLeft;
+
+      this.setData({
+        formIsValid: isValid,
+        errors: errors
+      });
+      
+      return {
+        isBusinessNameValid,
+        isDescriptionValid,
+        isBusinessTypeValid,
+        isColorValid,
+        isLogoStyleValid,
+        hasGenerationsLeft,
+        errors,
+        isValid
+      };
+    },
+
+    // Initialize and check daily generation limit
+    _initDailyGenerationLimit() {
+      // Get stored generation data
+      my.getStorage({
+        key: 'logoGenerationData',
+        success: (res) => {
+          const { data } = res;
+          const today = new Date().toDateString();
+
+          // Check if we have data and if it's from today
+          if (data && data.date === today) {
+            // Data exists for today, use stored values
+            this.setData({
+              dailyGenerationsLeft: data.generationsLeft,
+              lastGenerationDate: data.date
+            }, () => {
+              this._checkFormValidity();
+            });
+          } else {
+            // No data or it's a new day, reset counter
+            const newData = {
+              date: today,
+              generationsLeft: this.data.dailyGenerationsTotal
+            };
+
+            my.setStorage({
+              key: 'logoGenerationData',
+              data: newData,
+              success: () => {
+                this.setData({
+                  dailyGenerationsLeft: this.data.dailyGenerationsTotal,
+                  lastGenerationDate: today
+                }, () => {
+                  this._checkFormValidity();
+                });
+              }
+            });
+          }
+        },
+        fail: () => {
+          // No data exists yet, initialize with default values
+          const today = new Date().toDateString();
+          const newData = {
+            date: today,
+            generationsLeft: this.data.dailyGenerationsTotal
+          };
+
+          my.setStorage({
+            key: 'logoGenerationData',
+            data: newData,
+            success: () => {
+              this.setData({
+                dailyGenerationsLeft: this.data.dailyGenerationsTotal,
+                lastGenerationDate: today
+              }, () => {
+                this._checkFormValidity();
+              });
+            }
+          });
+        }
+      });
+    },
+
+    // Update the generation count after successful generation
+    _updateGenerationCount() {
+      // Only decrease if we have generations left
+      if (this.data.dailyGenerationsLeft <= 0) {
+        return; // Already at zero, don't update
+      }
+
+      const generationsLeft = Math.max(0, this.data.dailyGenerationsLeft - 1);
+      const today = new Date().toDateString();
+
+      // Update local state
+      this.setData({
+        dailyGenerationsLeft: generationsLeft,
+        lastGenerationDate: today
+      }, () => {
+        this._checkFormValidity();
       });
 
-      // If preview is already showing, update it with the new style
-      if (this.data.showPreview) {
-        this.generateLogo();
-      }
+      // Update storage
+      my.setStorage({
+        key: 'logoGenerationData',
+        data: {
+          date: today,
+          generationsLeft: generationsLeft
+        }
+      });
     },
 
     async generateLogo() {
-      if (!this.data.businessName) {
+      // Run validation and get detailed results
+      const validationResults = this._checkFormValidity();
+      
+      if (!validationResults.isValid) {
+        let errorMessage = 'Please fill in all required fields';
+
+        // Show specific error message based on validation results
+        if (!validationResults.isBusinessNameValid) {
+          errorMessage = 'Business name must be at least 2 characters';
+        } else if (!validationResults.isDescriptionValid) {
+          errorMessage = 'Description must be at least 10 characters';
+        } else if (!validationResults.isBusinessTypeValid) {
+          errorMessage = 'Please select a business type';
+        } else if (!validationResults.isColorValid) {
+          errorMessage = 'Please select valid colors for your logo';
+        } else if (!validationResults.isLogoStyleValid) {
+          errorMessage = 'Please select a valid logo style';
+        } else if (!validationResults.hasGenerationsLeft) {
+          errorMessage = 'Daily generation limit reached. Try again tomorrow.';
+        }
+
         my.showToast({
           type: 'fail',
-          content: 'Please enter a business name',
+          content: errorMessage,
           duration: 2000
         });
         return;
       }
 
+      // Decrease the generation count
+      this._updateGenerationCount();
+
       // Show loading indicator
       this.setData({
-        isLoading: true
+        isLoading: true,
+        showLoadingMask: true,
+        loadingMessage: 'Generating logo...'
       });
 
-      // Show loading dialog
+      // Show loading dialog with mask
       my.showLoading({
         content: 'Generating logo...',
-        delay: 0
+        delay: 0,
+        mask: true
       });
 
       // Generate logo based on selected options
@@ -141,138 +420,69 @@ Component({
         console.log('Full API response:', JSON.stringify(response, null, 2));
 
         // Process the API response
-        const processedLogos = [];
 
         if (response.data) {
-          // Check if the response has data.outputs
-          if (response.data.outputs) {
-            console.log('API Response outputs:', JSON.stringify(response.data.outputs, null, 2));
+          console.log('API Response:', JSON.stringify(response.data, null, 2));
+          if (response.data.data.status === 'succeeded') {
+            if (response.data.data.outputs.text) {
+              console.log('API Response outputs:', JSON.stringify(response.data.data.outputs, null, 2));
+              // Initialize or clear the generatedLogos array
+              let generatedLogos = [];
 
-            // Check for image in various possible locations
-            if (response.data.outputs.image) {
-              console.log('Found image in outputs.image');
-              processedLogos.push({
-                url: response.data.outputs.image,
-                filter: ''
-              });
-            } else if (response.data.outputs.images && response.data.outputs.images.length > 0) {
-              console.log('Found images array with length:', response.data.outputs.images.length);
-              // Add each image from the array
-              response.data.outputs.images.forEach((imageUrl, index) => {
-                processedLogos.push({
-                  url: imageUrl,
-                  filter: ''
-                });
-              });
-            } else if (response.data.outputs.logo) {
-              console.log('Found image in outputs.logo');
-              processedLogos.push({
-                url: response.data.outputs.logo,
-                filter: ''
-              });
-            } else if (response.data.outputs.url) {
-              console.log('Found image in outputs.url');
-              processedLogos.push({
-                url: response.data.outputs.url,
-                filter: ''
-              });
-            } else if (response.data.outputs.text) {
-              // Check if the text contains a markdown image link
-              const text = response.data.outputs.text;
-              console.log('Found text in outputs.text:', text);
-
-              // Extract image URL from markdown format: ![](url)
-              const markdownImageRegex = /!\[.*?\]\((.*?)\)/g;
-              const matches = [...text.matchAll(markdownImageRegex)];
-
-              if (matches && matches.length > 0) {
-                console.log('Found image URLs in markdown text:', matches.length);
-
-                matches.forEach((match, index) => {
-                  if (match[1]) {
-                    const imageUrl = match[1].split('?')[0]; // Remove query parameters if any
-                    console.log(`Extracted image URL ${index + 1}:`, imageUrl);
-
-                    processedLogos.push({
-                      url: match[1], // Use the full URL with parameters
-                      filter: ''
-                    });
+              // Add the text output to the generatedLogos array
+              // Check if the output is already an array
+              if (Array.isArray(response.data.data.outputs.text)) {
+                console.log('API returned an array of URLs:', response.data.data.outputs.text);
+                generatedLogos = response.data.data.outputs.text;
+              } else if (typeof response.data.data.outputs.text === 'string') {
+                // If it's a single string, try to parse it as JSON if it looks like an array
+                if (response.data.data.outputs.text.startsWith('[') && response.data.data.outputs.text.endsWith(']')) {
+                  try {
+                    const parsedUrls = JSON.parse(response.data.data.outputs.text);
+                    if (Array.isArray(parsedUrls)) {
+                      console.log('Parsed text as JSON array:', parsedUrls);
+                      generatedLogos = parsedUrls;
+                    }
+                  } catch (e) {
+                    console.error('Failed to parse text as JSON:', e);
+                    // Fall back to treating it as a single URL
+                    generatedLogos = [response.data.data.outputs.text];
                   }
-                });
-              } else {
-                // If no image URLs found in text, show the text as a toast
-                my.alert({
-                  title: 'AI Response',
-                  content: text,
-                  buttonText: 'OK'
-                });
+                } else {
+                  // It's just a single URL string
+                  generatedLogos = [response.data.data.outputs.text];
+                }
               }
-            } else {
-              console.log('No image or text found in the API response');
+
+              console.log('Processed logos:', generatedLogos);
+
+              // Update the component state with the generated logo
+              this.setData({
+                generatedLogos: generatedLogos,
+                aiGeneratedLogoUrl: generatedLogos.length > 0 ? generatedLogos[0] : '',
+                showAiGeneratedLogo: generatedLogos.length > 0,
+                isLoading: false
+              }, () => {
+                // After state is updated, scroll to the logos section
+                if (generatedLogos.length > 0) {
+                  this.scrollToLogosSection();
+                }
+              });
+              console.log('Updated generatedLogos in state:', this.data.generatedLogos);
             }
-          } else if (response.data.data && response.data.data.outputs) {
-            // Handle nested data structure
-            const outputs = response.data.data.outputs;
-            console.log('Nested outputs:', JSON.stringify(outputs, null, 2));
-
-            if (outputs.image) {
-              processedLogos.push({
-                url: outputs.image,
-                filter: ''
-              });
-            } else if (outputs.images && outputs.images.length > 0) {
-              outputs.images.forEach((imageUrl, index) => {
-                processedLogos.push({
-                  url: imageUrl,
-                  filter: ''
-                });
-              });
-            } else if (outputs.logo) {
-              processedLogos.push({
-                url: outputs.logo,
-                filter: ''
-              });
-            } else if (outputs.url) {
-              processedLogos.push({
-                url: outputs.url,
-                filter: ''
-              });
-            } else if (outputs.text) {
-              // Check if the text contains a markdown image link
-              const text = outputs.text;
-              const markdownImageRegex = /!\[.*?\]\((.*?)\)/g;
-              const matches = [...text.matchAll(markdownImageRegex)];
-
-              if (matches && matches.length > 0) {
-                matches.forEach((match, index) => {
-                  if (match[1]) {
-                    processedLogos.push({
-                      url: match[1],
-                      filter: ''
-                    });
-                  }
-                });
-              }
-            }
-          }
-
-          // If we found logos, update the state
-          if (processedLogos.length > 0) {
-            this.setData({
-              generatedLogos: processedLogos,
-              aiGeneratedLogoUrl: processedLogos[0].url,
-              showAiGeneratedLogo: true,
-              isLoading: false
-            });
           } else {
-            this.setData({
-              isLoading: false
+            my.showToast({
+              type: 'fail',
+              content: 'Failed to generate logo',
+              duration: 2000
             });
           }
         }
-
-        // Hide loading indicator
+        // Hide loading indicator and mask
         my.hideLoading();
+        this.setData({
+          showLoadingMask: false
+        });
       } catch (error) {
         console.error('Error:', error);
         my.showToast({
@@ -284,7 +494,8 @@ Component({
         // Hide loading indicator and reset loading state
         my.hideLoading();
         this.setData({
-          isLoading: false
+          isLoading: false,
+          showLoadingMask: false
         });
       }
 
@@ -295,7 +506,7 @@ Component({
 
       my.showToast({
         type: 'success',
-        content: 'Logo generated successfully!',
+        content: 'Logo generated!',
         duration: 2000
       });
     },
@@ -320,7 +531,7 @@ Component({
 
       // In a real app, this would generate and download the specific logo
       my.showToast({
-        content: `Downloading logo variation #${parseInt(index) + 1}`,
+        content: `Downloading logo #${parseInt(index) + 1}`,
         duration: 2000
       });
     },
@@ -384,7 +595,8 @@ Component({
       // Handle download based on whether it's an AI-generated logo or text-based logo
       if (this.data.currentApiLogoIndex >= 0 && this.data.generatedLogos && this.data.generatedLogos[this.data.currentApiLogoIndex]) {
         // Download the AI-generated logo from the preview options
-        const logoUrl = this.data.generatedLogos[this.data.currentApiLogoIndex].url;
+        const logoUrl = this.data.generatedLogos[this.data.currentApiLogoIndex];
+        console.log(logoUrl)
         my.saveImage({
           url: logoUrl,
           success: () => {
@@ -418,11 +630,24 @@ Component({
       }
     },
 
-    previewAiLogo() {
+    previewAiLogo(e) {
       // Show the AI-generated logo in the preview modal
-      if (this.data.aiGeneratedLogoUrl) {
-        const logoUrl = this.data.aiGeneratedLogoUrl;
-        console.log('Previewing AI logo:', logoUrl);
+      if (this.data.generatedLogos && this.data.generatedLogos.length > 0) {
+        // Get the logo index from the data attribute if available, otherwise use the first logo
+        let logoIndex = 0;
+
+        if (e && e.target && e.target.dataset && e.target.dataset.index !== undefined) {
+          logoIndex = parseInt(e.target.dataset.index);
+          console.log('Selected logo index:', logoIndex);
+        }
+
+        // Make sure the index is valid
+        if (logoIndex >= this.data.generatedLogos.length) {
+          logoIndex = 0;
+        }
+
+        const logoUrl = this.data.generatedLogos[logoIndex];
+        console.log('Previewing AI logo from generatedLogos:', logoUrl);
 
         // First ensure the URL is set correctly
         this.setData({
@@ -434,7 +659,7 @@ Component({
             previewLogoBackground: 'transparent',  // Use transparent background for AI images
             previewLogoTextColor: '#000000',       // Default text color
             previewLogoIndex: -1,                  // Special index for AI-generated logo
-            currentApiLogoIndex: -1                // Reset API logo index for main logo
+            currentApiLogoIndex: logoIndex         // Set to the selected logo index
           });
         });
       } else {
@@ -451,10 +676,11 @@ Component({
       if (this.data.aiGeneratedLogoUrl) {
         my.saveImage({
           url: this.data.aiGeneratedLogoUrl,
+          showActionSheet: true,
           success: () => {
             my.showToast({
               type: 'success',
-              content: 'Logo saved to gallery',
+              content: 'Logo saved successfully',
               duration: 2000
             });
           },
@@ -468,6 +694,24 @@ Component({
           }
         });
       }
+    },
+
+    scrollToLogosSection() {
+      // Add a small delay to ensure the DOM has updated
+      setTimeout(() => {
+        // Use the Alipay Mini Program API to scroll to the logos section
+        my.createSelectorQuery()
+          .select('.preview-container')
+          .boundingClientRect()
+          .exec((ret) => {
+            if (ret && ret[0]) {
+              my.pageScrollTo({
+                scrollTop: ret[0].top - 20, // Scroll a bit above the section for better visibility
+                duration: 300
+              });
+            }
+          });
+      }, 300);
     }
   }
 });

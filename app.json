@@ -1,10 +1,12 @@
 {
   "pages": [
+    "pages/splash/splash",
     "pages/index/index",
     "pages/photo-filter/index"
   ],
   "window": {
-    "defaultTitle": "Merchant Logo Generator"
+    "defaultTitle": "Merchant Logo Generator",
+    "titleBarColor": "#3B95A4"
   },
   "usingComponents": {
     "photo-filter": "/components/photo-filter/photo-filter",
